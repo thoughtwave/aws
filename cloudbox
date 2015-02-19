@@ -7,6 +7,12 @@ HOSTS=/var/tmp/lamptimer-hosts
 
 case "`basename $0`" in
 cloudbox)
+ for i in `grep \)$ cloudbox | grep -v init | awk '{print $1}' | cut -f1 -d\) | xargs`
+ do
+  ln -s `basename $0` $i
+ done
+;;
+cloudbox)
 
  echo CloudBOX is not meant to be run directly
 ;;

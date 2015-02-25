@@ -17,7 +17,7 @@ cloudbox)
  echo CloudBOX is not meant to be run directly
 ;;
 
-aws usage)
+awsusage)
 
  aws $REGION ec2 describe-instances --query 'Reservations[*].Instances[].[InstanceType]' --output text | sort | uniq -c
  aws $REGION rds describe-db-instances --query 'DBInstances[*].[AllocatedStorage DBInstanceClass]' --output text | awk '{print $2}' | sort | uniq -c

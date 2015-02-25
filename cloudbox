@@ -233,6 +233,9 @@ volume2instancemap)
 
 volume2instancemap-monitor)
  volume2instancemap > /tmp/volume2instancemap.new
+ date >> /var/log/v2i/v2i.log
+ diff /tmp/volume2instancemap /tmp/volume2instancemap.new 2>&1 && no changes detected in volume to instance mapping >> /var/log/v2i/v2i.log
+ mv /tmp/volume2instancemap.new /tmp/volume2instancemap 
 ;;
 
 esac

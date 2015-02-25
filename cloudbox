@@ -228,7 +228,7 @@ waitforstack)
 ;;
 
 volume2instancemap)
-  aws ec2 describe-volumes --query 'Volumes[*].[Attachments[*].[AttachTime VolumeId InstanceId Device]]' --output text
+  aws ec2 describe-volumes --query 'Volumes[*].[Attachments[*].[AttachTime VolumeId InstanceId Device]]' --output text | sort -n
 ;;
 
 esac

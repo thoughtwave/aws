@@ -231,4 +231,8 @@ volume2instancemap)
   aws ec2 describe-volumes --query 'Volumes[*].[Attachments[*].[AttachTime VolumeId InstanceId Device]]' --output text | sort -n
 ;;
 
+volume2instancemap-monitor)
+ volume2instancemap > /tmp/volume2instancemap.new
+;;
+
 esac

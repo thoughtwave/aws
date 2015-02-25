@@ -19,8 +19,8 @@ cloudbox)
 
 awsusage)
 
- aws $REGION ec2 describe-instances --query 'Reservations[*].Instances[].[InstanceType]' --output text | sort | uniq -c
- aws $REGION rds describe-db-instances --query 'DBInstances[*].[AllocatedStorage DBInstanceClass]' --output text | awk '{print $2}' | sort | uniq -c
+ aws --region=$REGION ec2 describe-instances --query 'Reservations[*].Instances[].[InstanceType]' --output text | sort | uniq -c
+ aws --region=$REGION rds describe-db-instances --query 'DBInstances[*].[AllocatedStorage DBInstanceClass]' --output text | awk '{print $2}' | sort | uniq -c
 ;;
 
 checkport)
@@ -34,17 +34,17 @@ checkport)
 
 instance2volume)
 
- aws $REGION ec2 describe-instances --instance-ids $1 --query 'Reservations[].Instances[].BlockDeviceMappings[].Ebs[].VolumeId' --output text
+ aws --region=$REGION ec2 describe-instances --instance-ids $1 --query 'Reservations[].Instances[].BlockDeviceMappings[].Ebs[].VolumeId' --output text
 ;;
 
 instancelist)
 
- aws $REGION ec2 describe-instances --query 'Reservations[*].Instances[*].[NetworkInterfaces[].Association[].PublicIp Tags[?Key==`Name`].Value[] ]' --output text
+ aws --region=$REGION ec2 describe-instances --query 'Reservations[*].Instances[*].[NetworkInterfaces[].Association[].PublicIp Tags[?Key==`Name`].Value[] ]' --output text
 ;;
 
 instances)
 
- aws $REGION ec2 describe-instances --query 'Reservations[*].Instances[*].[PublicIpAddress]' --output text | grep -v None
+ aws --region=$REGION ec2 describe-instances --query 'Reservations[*].Instances[*].[PublicIpAddress]' --output text | grep -v None
 ;;
 
 ison)
@@ -92,12 +92,12 @@ lamptimer)
   if [ "$state" = "OFF" ]
   then
    STOPPED="$STOPPED $instance"
-   aws $REGION ec2 stop-instances --instance-id $instance --output text
-   aws $REGION ec2 describe-instances --instance-id $instance --query 'Reservations[*].Instances[*].[NetworkInterfaces[].Association[].PublicIp ]'
+   aws --region=$REGION ec2 stop-instances --instance-id $instance --output text
+   aws --region=$REGION ec2 describe-instances --instance-id $instance --query 'Reservations[*].Instances[*].[NetworkInterfaces[].Association[].PublicIp ]'
   else
    STARTED="$STARTED $instance"
-   aws $REGION ec2 start-instances --instance-id $instance --output text
-   instanceip=`aws $REGION ec2 describe-instances --instance-id i-992da953 --query 'Reservations[*].Instances[*].[NetworkInterfaces[].Association[].PublicIp]' --output text`
+   aws --region=$REGION ec2 start-instances --instance-id $instance --output text
+   instanceip=`aws --region=$REGION ec2 describe-instances --instance-id i-992da953 --query 'Reservations[*].Instances[*].[NetworkInterfaces[].Association[].PublicIp]' --output text`
    if [ "$instanceip" ]
    then
     echo "$instanceip $instance" | tee -a $HOSTS
@@ -130,24 +130,24 @@ launchstatus)
 
 loadbalancers)
 
- aws $REGION elb describe-load-balancers --query 'LoadBalancerDescriptions[*].[CreatedTime DNSName]' --output text  
+ aws --region=$REGION elb describe-load-balancers --query 'LoadBalancerDescriptions[*].[CreatedTime DNSName]' --output text  
 ;;
 
  snapshot)
 
- aws $REGION ec2 create-snapshot --volume-id $1 --output table
+ aws --region=$REGION ec2 create-snapshot --volume-id $1 --output table
 ;;
 
  snapstatus)
 
-  aws $REGION ec2 describe-snapshots --query 'Snapshots[].[StartTime VolumeSize Progress SnapshotId Description]' --output table
+  aws --region=$REGION ec2 describe-snapshots --query 'Snapshots[].[StartTime VolumeSize Progress SnapshotId Description]' --output table
 ;;
 
  stackevents)
 
  if [ $1 ]
  then
-   aws $REGION cloudformation describe-stack-events --stack-name $1 --query 'StackEvents[*].[Timestamp LogicalResourceId ResourceStatus]' --output table
+   aws --region=$REGION cloudformation describe-stack-events --stack-name $1 --query 'StackEvents[*].[Timestamp LogicalResourceId ResourceStatus]' --output table
  else
   echo DOES_NOT_EXIST
  fi
@@ -155,15 +155,15 @@ loadbalancers)
 
 stacks)
 
- aws $REGION cloudformation describe-stacks --query 'Stacks[*].[StackName StackStatus]' --output text
+ aws --region=$REGION cloudformation describe-stacks --query 'Stacks[*].[StackName StackStatus]' --output text
 ;;
 
 susd)
 
- INSTANCES=`aws $REGION ec2 describe-instances --query 'Reservations[*].Instances[*].[InstanceId]' --output text | xargs`
+ INSTANCES=`aws --region=$REGION ec2 describe-instances --query 'Reservations[*].Instances[*].[InstanceId]' --output text | xargs`
  for INSTANCE in $INSTANCES
  do
-  SETTING=`aws $REGION ec2 describe-tags --filters "Name=resource-id, Values=$INSTANCE" --query 'Tags[?Key==\`Schedule\`].Value[]' --output text`
+  SETTING=`aws --region=$REGION ec2 describe-tags --filters "Name=resource-id, Values=$INSTANCE" --query 'Tags[?Key==\`Schedule\`].Value[]' --output text`
   STATUS=`ison $SETTING`
   echo "$INSTANCE SHOULD BE $SETTING. $STATUS"
  done
@@ -171,11 +171,11 @@ susd)
 
 susdBatch)
 
- INSTANCES=`aws $REGION ec2 describe-instances --query 'Reservations[*].Instances[*].[InstanceId]' --output text | xargs`
+ INSTANCES=`aws --region=$REGION ec2 describe-instances --query 'Reservations[*].Instances[*].[InstanceId]' --output text | xargs`
  for INSTANCE in $INSTANCES
  do
-  STATUS=`aws $REGION ec2 describe-tags --filters "Name=resource-id, Values=$INSTANCE" --query 'Tags[?Key==\`Schedule\`].Value[]' --output text`
-  NAME=`aws $REGION ec2 describe-tags --filters "Name=resource-id, Values=$INSTANCE" --query 'Tags[?Key==\`Name\`].Value[]' --output text`
+  STATUS=`aws --region=$REGION ec2 describe-tags --filters "Name=resource-id, Values=$INSTANCE" --query 'Tags[?Key==\`Schedule\`].Value[]' --output text`
+  NAME=`aws --region=$REGION ec2 describe-tags --filters "Name=resource-id, Values=$INSTANCE" --query 'Tags[?Key==\`Name\`].Value[]' --output text`
   if [ "$STATUS" = "OFF" ]
   then
    STOPLIST="$STOPLIST $INSTANCE"
@@ -192,20 +192,20 @@ susdBatch)
 
 susdQueryAll)
 
- INSTANCES=`aws $REGION ec2 describe-instances --query 'Reservations[*].Instances[*].[InstanceId]' --output text | xargs`
+ INSTANCES=`aws --region=$REGION ec2 describe-instances --query 'Reservations[*].Instances[*].[InstanceId]' --output text | xargs`
  for INSTANCE in $INSTANCES
  do
-  echo $INSTANCE `aws $REGION ec2 describe-tags --filters "Name=resource-id, Values=$INSTANCE" --query 'Tags[?Key==\`Schedule\`].Value[]' --output text`
+  echo $INSTANCE `aws --region=$REGION ec2 describe-tags --filters "Name=resource-id, Values=$INSTANCE" --query 'Tags[?Key==\`Schedule\`].Value[]' --output text`
  done
 ;;
 
 susdStartAll)
 
- INSTANCES=`aws $REGION ec2 describe-instances --query 'Reservations[*].Instances[*].[InstanceId]' --output text | xargs`
+ INSTANCES=`aws --region=$REGION ec2 describe-instances --query 'Reservations[*].Instances[*].[InstanceId]' --output text | xargs`
  for INSTANCE in $INSTANCES
  do
   echo $INSTANCE
-  aws $REGION ec2 create-tags --resources $INSTANCE --tags Key=Schedule,Value=ON
+  aws --region=$REGION ec2 create-tags --resources $INSTANCE --tags Key=Schedule,Value=ON
  done
 ;;
 
@@ -228,7 +228,7 @@ waitforstack)
 ;;
 
 volume2instancemap)
-  aws $REGION ec2 describe-volumes --query 'Volumes[*].[Attachments[*].[AttachTime VolumeId InstanceId Device]]' --output text | sort -n
+  aws --region=$REGION ec2 describe-volumes --query 'Volumes[*].[Attachments[*].[AttachTime VolumeId InstanceId Device]]' --output text | sort -n
 ;;
 
 volume2instancemap-monitor)

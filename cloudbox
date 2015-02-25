@@ -4,6 +4,10 @@ CONF=/etc/lamptimer/instances.cfg
 NOW=`/bin/date +'%w%H%M'`
 AWK=/bin/awk
 HOSTS=/var/tmp/lamptimer-hosts
+if [ ! "$REGION" ]
+then
+ REGION=us-west-1
+fi
 
 case "`basename $0`" in
 cloudbox)
@@ -234,7 +238,7 @@ volume2instancemap)
 volume2instancemap-monitor)
  MAPNAME=/tmp/volume2instancemap.${REGION}
  volume2instancemap > ${MAPNAME}.new
- date >> /var/log/v2i/v2i.log
+ date >> /var/log/v2i/${REGION}-v2i.log
  diff ${MAPNAME} ${MAPNAME}.new 2>&1  >> /var/log/v2i/v2i.log
  mv ${MAPNAME}.new ${MAPNAME}
 ;;
